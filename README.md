@@ -7,8 +7,9 @@
 | パス | 内容 |
 |---|---|
 | `.claude/skills/kiro-*/` | cc-sdd のスキル 17 個。Claude Code が読み込む本体 |
+| `.claude/settings.json` | ECC と競合しないためのプロジェクト設定（[ECC との併用](#ecc-との併用)） |
 | `.kiro/settings/templates/` | 仕様（要件・設計・タスク）とステアリングのテンプレート |
-| `CLAUDE.md` | cc-sdd のワークフローを記したプロジェクトメモリ |
+| `CLAUDE.md` | cc-sdd のワークフローと ECC との使い分けを記したプロジェクトメモリ |
 | `docs/jp/` | スキルの日本語訳（参照用。Claude Code は読み込まない）。入口は [docs/jp/README.md](docs/jp/README.md) |
 | `THIRD_PARTY_NOTICES.md` | cc-sdd の MIT ライセンス表記 |
 
@@ -52,7 +53,10 @@ cp -R /tmp/custom-cc-sdd/.kiro/settings/templates .kiro/settings/
 cp /tmp/custom-cc-sdd/THIRD_PARTY_NOTICES.md .
 ```
 
-`CLAUDE.md` はプロジェクトにすでにある場合、上書きせずに `/tmp/custom-cc-sdd/CLAUDE.md` の内容を追記する。ない場合はそのままコピーする。
+次の 2 ファイルは、プロジェクトにすでにある場合は上書きせずに中身を統合する。ない場合はそのままコピーする。
+
+- `CLAUDE.md`：`/tmp/custom-cc-sdd/CLAUDE.md` の内容を追記する
+- `.claude/settings.json`：`claudeMdExcludes` と `skillOverrides` の項目を追加する
 
 ### 導入後
 
@@ -63,6 +67,18 @@ Claude Code を起動し、次のどれかから始める。
 - `/kiro-spec-init <作りたいもの>`：1 つの機能の仕様を作り始める
 
 スキルごとの詳しい動作は [docs/jp/README.md](docs/jp/README.md) を参照。
+
+## ECC との併用
+
+[Everything Claude Code（ECC）](https://github.com/affaan-m/ECC) を `~/.claude` に入れている環境では、ECC にも独自の開発フロー（planner → tdd-guide → code-reviewer など）があり、cc-sdd の `kiro-*` と役割が重なる。このリポジトリでは、ECC の開発フローに関わる部分だけを止め、コーディング規約やセキュリティなどの品質ルールは残す。ECC がない環境では、以下の設定は何も影響しない。
+
+| 仕組み | 場所 | 内容 |
+|---|---|---|
+| ルールの除外 | `.claude/settings.json` の `claudeMdExcludes` | ECC の `common/development-workflow.md`、`common/agents.md`、`common/code-review.md` を読み込まない |
+| コマンドの自動起動を止める | `.claude/settings.json` の `skillOverrides` | `/plan`、`/prp-*`、`/orch-*`、`/multi-*`、`/gan-*`、`/code-review`、言語別の TDD コマンドなどを `user-invocable-only` にする。ユーザーが `/` で呼べば従来どおり動く |
+| 使い分けの指示 | `CLAUDE.md` の「ECC との併用」 | 開発の流れは `kiro-*` で進める。`kiro-*` のサブエージェントには `general-purpose` を使い、ECC のエージェントを使わない |
+
+ECC のエージェント自体は禁止していないので、ユーザーが名指しで頼めば使える。完全に禁止したい場合は、`.claude/settings.json` の `permissions.deny` に `"Agent(code-reviewer)"` のように追加する。
 
 ## メンテナンス
 

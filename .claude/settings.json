@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "claudeMdExcludes": [
+    "**/.claude/rules/ecc/common/development-workflow.md",
+    "**/.claude/rules/ecc/common/agents.md",
+    "**/.claude/rules/ecc/common/code-review.md"
+  ],
+  "skillOverrides": {
+    "plan": "user-invocable-only",
+    "plan-prd": "user-invocable-only",
+    "prp-prd": "user-invocable-only",
+    "prp-plan": "user-invocable-only",
+    "prp-implement": "user-invocable-only",
+    "feature-dev": "user-invocable-only",
+    "orch-add-feature": "user-invocable-only",
+    "orch-build-mvp": "user-invocable-only",
+    "orch-change-feature": "user-invocable-only",
+    "orch-fix-defect": "user-invocable-only",
+    "orch-refine-code": "user-invocable-only",
+    "multi-plan": "user-invocable-only",
+    "multi-execute": "user-invocable-only",
+    "multi-workflow": "user-invocable-only",
+    "multi-backend": "user-invocable-only",
+    "multi-frontend": "user-invocable-only",
+    "gan-build": "user-invocable-only",
+    "gan-design": "user-invocable-only",
+    "code-review": "user-invocable-only",
+    "cpp-test": "user-invocable-only",
+    "go-test": "user-invocable-only",
+    "kotlin-test": "user-invocable-only",
+    "react-test": "user-invocable-only",
+    "rust-test": "user-invocable-only"
+  }
+}

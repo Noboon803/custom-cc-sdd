@@ -47,7 +47,7 @@ Skills are located in `.claude/skills/kiro-*/SKILL.md`
 - `kiro-review` — task-local adversarial review protocol used by reviewer subagents
 - `kiro-debug` — root-cause-first debug protocol used by debugger subagents
 - `kiro-verify-completion` — fresh-evidence gate before success or completion claims
-- **If there is even a 1% chance a skill applies to the current task, invoke it.** Do not skip skills because the task seems simple.
+- **If there is even a 1% chance a `kiro-*` skill applies to the current task, invoke it.** Do not skip skills because the task seems simple.
 
 ## Development Rules
 - 3-phase approval workflow: Requirements → Design → Tasks → Implementation
@@ -59,3 +59,14 @@ Skills are located in `.claude/skills/kiro-*/SKILL.md`
 - Load entire `.kiro/steering/` as project memory
 - Default files: `product.md`, `tech.md`, `structure.md`
 - Custom files are supported (managed via `/kiro-steering-custom`)
+
+## ECC との併用
+ユーザー環境に Everything Claude Code（ECC）が入っている場合、このプロジェクトでは次のように使い分ける。ECC がない環境では、このセクションは関係しない。
+
+- 開発の流れ（ディスカバリー・仕様作成・実装・レビュー・検証）は `kiro-*` スキルで進める。ECC のエージェント（planner、architect、tdd-guide、code-reviewer など）やコマンド（`/plan`、`/prp-*`、`/orch-*` など）を、`kiro-*` の各フェーズの代わりに使わない
+- `kiro-*` スキルがサブエージェントを起動するとき、スキル側に指定がなければ `subagent_type` は `general-purpose` にする。ECC のエージェントは独自の指示と出力形式を持つため、実装担当・レビュー担当・デバッグ担当の構造化出力（`STATUS`、`VERDICT`、`NEXT_ACTION` など）が崩れる
+- ECC のコーディング規約・セキュリティ・テストの基準は品質基準として守る。ただし「エージェントを使う」「レビューを必須にする」といった進め方の指示は、`kiro-*` の手順（`kiro-impl` のレビューゲートや `kiro-verify-completion` など）で満たされたものとみなす
+- ユーザーが ECC のエージェントやコマンドを名指しで指示した場合は、それに従う
+- `.claude/settings.json` で次の設定をしている
+  - `claudeMdExcludes`: 開発の流れを定める ECC のルール（`development-workflow.md`、`agents.md`、`code-review.md`）を読み込まない
+  - `skillOverrides`: 計画・実装・レビューの流れを持つ ECC のコマンドを `user-invocable-only` にし、ユーザーが明示的に呼んだときだけ動くようにする
