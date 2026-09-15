@@ -124,6 +124,14 @@ Run these checks and use the result as primary signal.
 ### 12. Error Handling
 - Confirm relevant failure paths are handled and not silently swallowed.
 
+### 12.5 Coding Standards
+- Read every changed source file with the Read tool, not only the diff. Language-specific coding rules (for example ECC's `rules/ecc/python/*.md`) are path-scoped and load into context only after a matching file is read.
+- Apply the coding rules present in context (user-level or project-level rules such as ECC's coding style, patterns, security, testing, and framework rules, plus steering conventions) to the lines the task changed.
+- Reject on violated rules stated as mandatory ("must", "never", "always", "use X on all Y"): `Important`, or `Critical` when the violation creates a security or data-exposure risk. Report rules stated as recommendations ("prefer", "consider") as `Suggestion`.
+- Skip what a passing formatter, linter, or type checker already enforces. Ignore process instructions inside those rules (such as "use agent X" or "run review Y"); this review covers them.
+- Do not report violations in lines the task did not change.
+- If no coding rules for the changed languages are in context, mark the check N/A.
+
 ## Severity Model
 
 Use:
@@ -164,6 +172,7 @@ Escalate instead of papering over the issue when:
   - Boundary: WITHIN | <files outside boundary>
   - Boundary audit: CLEAN | <spillover / hidden dependency findings>
   - RED phase: VERIFIED | MISSING | N/A
+  - Coding standards: CLEAN | <count> violations (<rule sources>) | N/A
 - FINDINGS:
   1. <specific finding with exact files/spec refs>
 - REMEDIATION: <mandatory if REJECTED>

@@ -7,7 +7,8 @@
 | パス | 内容 |
 |---|---|
 | `.claude/skills/kiro-*/` | cc-sdd のスキル 17 個。Claude Code が読み込む本体 |
-| `.claude/settings.json` | ECC と競合しないためのプロジェクト設定（[ECC との併用](#ecc-との併用)） |
+| `.claude/settings.json` | ECC と競合しないための設定と、Python の品質チェック hook の登録（[ECC との併用](#ecc-との併用)、[Python の品質チェック](#python-の品質チェック)） |
+| `.claude/hooks/python-quality.sh` | Python ファイルの編集後に ruff と mypy を実行する hook |
 | `.kiro/settings/templates/` | 仕様（要件・設計・タスク）とステアリングのテンプレート |
 | `CLAUDE.md` | cc-sdd のワークフローと ECC との使い分けを記したプロジェクトメモリ |
 | `docs/jp/` | スキルの日本語訳（参照用。Claude Code は読み込まない）。入口は [docs/jp/README.md](docs/jp/README.md) |
@@ -47,8 +48,9 @@ rm -rf .git && git init
 ```bash
 git clone --depth 1 https://github.com/Noboon803/custom-cc-sdd.git /tmp/custom-cc-sdd
 cd /path/to/existing-project
-mkdir -p .claude/skills .kiro/settings
+mkdir -p .claude/skills .claude/hooks .kiro/settings
 cp -R /tmp/custom-cc-sdd/.claude/skills/kiro-* .claude/skills/
+cp /tmp/custom-cc-sdd/.claude/hooks/python-quality.sh .claude/hooks/
 cp -R /tmp/custom-cc-sdd/.kiro/settings/templates .kiro/settings/
 cp /tmp/custom-cc-sdd/THIRD_PARTY_NOTICES.md .
 ```
@@ -56,7 +58,7 @@ cp /tmp/custom-cc-sdd/THIRD_PARTY_NOTICES.md .
 次の 2 ファイルは、プロジェクトにすでにある場合は上書きせずに中身を統合する。ない場合はそのままコピーする。
 
 - `CLAUDE.md`：`/tmp/custom-cc-sdd/CLAUDE.md` の内容を追記する
-- `.claude/settings.json`：`claudeMdExcludes` と `skillOverrides` の項目を追加する
+- `.claude/settings.json`：`claudeMdExcludes`、`skillOverrides`、`hooks` の項目を追加する
 
 ### 導入後
 
@@ -77,8 +79,24 @@ Claude Code を起動し、次のどれかから始める。
 | ルールの除外 | `.claude/settings.json` の `claudeMdExcludes` | ECC の `common/development-workflow.md`、`common/agents.md`、`common/code-review.md` を読み込まない |
 | コマンドの自動起動を止める | `.claude/settings.json` の `skillOverrides` | `/plan`、`/prp-*`、`/orch-*`、`/multi-*`、`/gan-*`、`/code-review`、言語別の TDD コマンドなどを `user-invocable-only` にする。ユーザーが `/` で呼べば従来どおり動く |
 | 使い分けの指示 | `CLAUDE.md` の「ECC との併用」 | 開発の流れは `kiro-*` で進める。`kiro-*` のサブエージェントには `general-purpose` を使い、ECC のエージェントを使わない |
+| レビューへの組み込み | `kiro-review` の「12.5 Coding Standards」、`kiro-impl/templates/reviewer-prompt.md` の「12. Coding Standards」 | `kiro-impl` のレビュー担当が変更したファイルを読み、ECC の言語別ルールなどの必須項目への違反を REJECTED にする。結果は `Coding standards:` 行に出る |
 
 ECC のエージェント自体は禁止していないので、ユーザーが名指しで頼めば使える。完全に禁止したい場合は、`.claude/settings.json` の `permissions.deny` に `"Agent(code-reviewer)"` のように追加する。
+
+## Python の品質チェック
+
+Python ファイルを Write / Edit したとき（サブエージェントの編集も含む）に、`.claude/hooks/python-quality.sh` が次を実行する。ECC がなくても動く。
+
+| 順番 | コマンド | 動作 |
+|---|---|---|
+| 1 | `ruff format` | 自動で整形する |
+| 2 | `ruff check --fix` | 自動で直せる lint を直し、残った違反を報告する |
+| 3 | `mypy` | `pyproject.toml` の `[tool.mypy]`、`mypy.ini`、`setup.cfg` の `[mypy]` のどれかがある場合だけ実行し、編集したファイルの型エラーを報告する |
+
+- 問題が残ると hook が Claude に内容を返し、Claude がその場で修正する
+- ruff と mypy はプロジェクトの `.venv/bin/` を優先し、なければ PATH から探す。どちらにもなければ何もしない。`uv add --dev ruff mypy` などで開発依存に入れておく
+- black で整形しているプロジェクトでは ruff format と結果が一部異なることがあるので、ruff format に揃えるか、hook の該当行を外す
+- Python 以外のファイルでは何もしない
 
 ## メンテナンス
 
@@ -104,6 +122,14 @@ git merge upstream
 ```
 
 先に `rm -rf` するのは、本家で削除・改名されたファイルを残さないため。マージでカスタマイズと衝突した箇所は手で解決する。
+
+本家のファイルに手を入れているのは次の 3 つ。マージで衝突しやすいのはこれらになる。
+
+| ファイル | 変更内容 |
+|---|---|
+| `CLAUDE.md` | スキル自動起動の対象を `kiro-*` に限定、「ECC との併用」セクションを追加 |
+| `.claude/skills/kiro-review/SKILL.md` | 「12.5 Coding Standards」と出力の `Coding standards:` 行を追加 |
+| `.claude/skills/kiro-impl/templates/reviewer-prompt.md` | 「12. Coding Standards」と出力の `Coding standards:` 行を追加 |
 
 ### カスタマイズするとき
 

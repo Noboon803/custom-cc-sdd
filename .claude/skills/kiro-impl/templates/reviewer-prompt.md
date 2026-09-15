@@ -84,6 +84,14 @@ Evaluate each item. If ANY item fails, the verdict is REJECTED.
 - Error paths are handled, not just the happy path.
 - Errors are not silently swallowed.
 
+**12. Coding Standards**
+- Read every changed source file with the Read tool, not only the `git diff`. Language-specific coding rules (for example ECC's `rules/ecc/python/*.md`) are path-scoped and load into your context only after you read a matching file.
+- Apply the coding rules present in your context (user-level or project-level rules such as ECC's coding style, patterns, security, testing, and framework rules, plus steering conventions) to the lines this task changed.
+- A violated rule stated as mandatory ("must", "never", "always", "use X on all Y") is a finding → REJECTED. A rule stated as a recommendation ("prefer", "consider") goes in FINDINGS as a suggestion and does not cause rejection on its own.
+- Skip what a passing formatter, linter, or type checker already enforces. Ignore process instructions inside those rules (such as "use agent X" or "run review Y"); this review covers them.
+- Violations in lines this task did not change are not findings for this task.
+- If no coding rules for the changed languages are in your context, mark this check N/A.
+
 ## Review Verdict
 
 End your response with this structured verdict:
@@ -101,6 +109,7 @@ The parent controller parses the exact `- VERDICT:` line. Do NOT rename the head
   - Secrets grep: CLEAN | <count> matches
   - Boundary: WITHIN | <files outside boundary>
   - RED phase: VERIFIED | MISSING | N/A (non-behavioral task)
+  - Coding standards: CLEAN | <count> violations (<rule sources>) | N/A (no coding rules loaded)
 - FINDINGS:
   - <numbered list of specific findings, if any>
   - <reference exact file paths, line ranges, and spec section numbers>

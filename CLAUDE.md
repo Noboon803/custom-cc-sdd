@@ -66,7 +66,9 @@ Skills are located in `.claude/skills/kiro-*/SKILL.md`
 - 開発の流れ（ディスカバリー・仕様作成・実装・レビュー・検証）は `kiro-*` スキルで進める。ECC のエージェント（planner、architect、tdd-guide、code-reviewer など）やコマンド（`/plan`、`/prp-*`、`/orch-*` など）を、`kiro-*` の各フェーズの代わりに使わない
 - `kiro-*` スキルがサブエージェントを起動するとき、スキル側に指定がなければ `subagent_type` は `general-purpose` にする。ECC のエージェントは独自の指示と出力形式を持つため、実装担当・レビュー担当・デバッグ担当の構造化出力（`STATUS`、`VERDICT`、`NEXT_ACTION` など）が崩れる
 - ECC のコーディング規約・セキュリティ・テストの基準は品質基準として守る。ただし「エージェントを使う」「レビューを必須にする」といった進め方の指示は、`kiro-*` の手順（`kiro-impl` のレビューゲートや `kiro-verify-completion` など）で満たされたものとみなす
+- `kiro-impl` のレビュー担当は、ECC などのコーディングルールの必須項目も判定基準にする（`kiro-review` の「12.5 Coding Standards」）
 - ユーザーが ECC のエージェントやコマンドを名指しで指示した場合は、それに従う
 - `.claude/settings.json` で次の設定をしている
   - `claudeMdExcludes`: 開発の流れを定める ECC のルール（`development-workflow.md`、`agents.md`、`code-review.md`）を読み込まない
   - `skillOverrides`: 計画・実装・レビューの流れを持つ ECC のコマンドを `user-invocable-only` にし、ユーザーが明示的に呼んだときだけ動くようにする
+  - `hooks`: Python ファイルを編集した後に `.claude/hooks/python-quality.sh` が ruff format・ruff check --fix・mypy（設定がある場合）を実行する。hook が問題を報告したら、その場で修正してから次に進む
