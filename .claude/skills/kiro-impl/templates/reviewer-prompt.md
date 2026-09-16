@@ -79,6 +79,10 @@ Evaluate each item. If ANY item fails, the verdict is REJECTED.
 - Tests prove the required behavior, not just scaffolding or happy-path shells.
 - Test assertions are meaningful (not `expect(true).toBe(true)` or similar).
 - Tests would fail if the implementation were removed or broken.
+- **Test depth** (custom-cc-sdd): Every behavior this task introduces or changes must have at least one test that would fail if that behavior broke — each acceptance criterion, each error path the requirements state, and each behavior the design specifies for this task. Every new or changed code path (function and branch) must be executed by a test; check this with the test runner's coverage report for the changed files. A missing test for any of these → REJECTED. Unexecuted defensive code is acceptable only with a stated reason.
+- The coverage threshold (from steering or the test configuration; 80% when none is set) is an overall floor. Meeting it never justifies a missing test from the bullet above.
+- Report in FINDINGS as suggestions, not rejections: tests for cases that neither the requirements nor the design state (for example, NaN handling), extra input variations for a behavior that already has a test, and extra hardening.
+- Do not run mutation testing (temporarily editing source code to see whether tests fail) unless the task changes data persistence, security, or authorization behavior. When you do, limit it to that behavior.
 
 **11. Error Handling**
 - Error paths are handled, not just the happy path.

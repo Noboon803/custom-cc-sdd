@@ -38,6 +38,9 @@ If any of these cannot be determined from the spec — the requirements are too 
   4. Remove the flag and confirm tests still pass
 - For non-behavioral tasks, use a standard RED → GREEN → REFACTOR cycle. **Run tests after writing them (before implementation) and capture the failing output.**
 - Use the acceptance criteria from the Task Brief to drive test design
+- **Test depth** (custom-cc-sdd): Every behavior this task introduces or changes needs at least one test that fails if that behavior breaks — each acceptance criterion, each error path the requirements state, and each behavior the design specifies for this task. Every new or changed code path (function and branch) must be executed by a test.
+- The coverage threshold (from steering or the test configuration; 80% when none is set) is an overall floor, not proof that the tests are sufficient. Meeting it never replaces a test required above.
+- Do not add tests for cases that neither the requirements nor the design state. Use one representative input per behavior unless the requirements or design name specific values (for example, inclusive boundaries).
 - Follow the design constraints exactly
 - Keep changes tightly scoped to the assigned task
 
